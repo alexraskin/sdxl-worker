@@ -23,7 +23,7 @@ const app = new Hono<{ Bindings: Bindings }>();
 app.use(
 	'*',
 	cors({
-		origin: 'https://mecha-muse.twizy.workers.dev',
+		origin: 'https://imagine.00z.sh',
 		allowHeaders: ['*'],
 		allowMethods: ['POST', 'GET'],
 		maxAge: 600,
@@ -33,7 +33,7 @@ app.use(
 app.use(
 	'*',
 	cache({
-		cacheName: 'mecha-muse',
+		cacheName: 'imagine.00z.sh',
 		cacheControl: 'max-age=3600',
 	}),
 );
