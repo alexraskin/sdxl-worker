@@ -2,6 +2,8 @@ import { Hono, Context } from 'hono';
 import { cors } from 'hono/cors';
 import { prettyJSON } from 'hono/pretty-json';
 import { logger } from 'hono/logger';
+import { cache } from 'hono/cache';
+import { timing, startTime, endTime } from 'hono/timing';
 import { Ai } from '@cloudflare/ai';
 
 import indexHtml from './public/index.html';
@@ -27,6 +29,15 @@ app.use(
 		maxAge: 600,
 	}),
 );
+
+app.use(
+	'*',
+	cache({
+		cacheName: 'mecha-muse',
+		cacheControl: 'max-age=3600',
+	}),
+);
+app.use(timing());
 app.use(logger());
 app.use(prettyJSON());
 
@@ -36,6 +47,7 @@ app.get('/', async (c: Context) => {
 });
 
 app.post('/', async (c: Context) => {
+	startTime(c, 'ai');
 	const body = await c.req.json();
 	const ai = new Ai(c.env.AI);
 
@@ -70,6 +82,7 @@ app.post('/', async (c: Context) => {
 	c.executionCtx.waitUntil(c.env.R2.put(key, response));
 
 	c.header('Content-Type', 'image/png');
+	endTime(c, 'ai');
 	return c.body(response);
 });
 
