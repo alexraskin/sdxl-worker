@@ -26,7 +26,6 @@ app.use(
 		origin: 'https://imagine.00z.sh',
 		allowHeaders: ['*'],
 		allowMethods: ['POST', 'GET'],
-		maxAge: 600,
 	}),
 );
 
