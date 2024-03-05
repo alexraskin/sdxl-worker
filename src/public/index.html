@@ -8,7 +8,7 @@
 			content="MechaMuse | generate an image using Cloudflare Workers, Cloudflare AI and the Stable Diffusion XL Model"
 		/>
 		<meta property="og:title" content="MechaMuse" />
-		<meta property="og:url" content="https://mecha-muse.twizy.workers.dev/" />
+		<meta property="og:url" content="https://imagine.00z.sh/" />
 		<meta property="og:type" content="website" />
 		<meta
 			property="og:description"
@@ -24,6 +24,7 @@
 				margin-top: 50px;
 				background-color: grey;
 			}
+
 			#inputField {
 				width: 50%;
 				padding: 10px;
@@ -56,6 +57,7 @@
 				border-radius: 4px;
 				padding: 5px;
 			}
+
 			.loader {
 				border: 5px solid #f3f3f3;
 				border-top: 5px solid #3498db;
@@ -71,10 +73,12 @@
 				0% {
 					transform: rotate(0deg);
 				}
+
 				100% {
 					transform: rotate(360deg);
 				}
 			}
+
 			footer {
 				text-align: center;
 				padding: 20px 0;
@@ -90,9 +94,17 @@
 			}
 		</style>
 	</head>
+
 	<body>
-		<h1>Generate an image using Stable Diffusion XL</h1>
-		<p>Running the Stable Diffusion XL model using the Cloudflare Workers AI</p>
+		<h1>Generate an image using models provided by the Cloudflare Workers AI</h1>
+		<p>Note some models are in beta and may not work as expected</p>
+		<select id="modelsDropdown">
+			<option value="@cf/lykon/dreamshaper-8-lcm">dreamshaper-8-lcm</option>
+			<option value="@cf/runwayml/stable-diffusion-v1-5-img2img">stable-diffusion-v1-5-img2img</option>
+			<option value="@cf/runwayml/stable-diffusion-v1-5-inpainting">stable-diffusion-v1-5-inpainting</option>
+			<option value="@cf/stabilityai/stable-diffusion-xl-base-1.0">stable-diffusion-xl-base-1.0</option>
+			<option value="@cf/bytedance/stable-diffusion-xl-lightning">stable-diffusion-xl-lightning</option>
+		</select>
 		<input type="text" id="inputField" placeholder="Enter a prompt" />
 		<button onclick="fetchImage()">Generate an image</button>
 		<div class="loader" id="loader"></div>
@@ -103,16 +115,21 @@
 			function fetchImage() {
 				var userInput = document.getElementById('inputField').value;
 				var loader = document.getElementById('loader');
+				const dropdown = document.getElementById('modelsDropdown');
+				const selectedValue = dropdown.options[dropdown.selectedIndex].value;
 
 				loader.style.display = 'block';
 				imageContainer.innerHTML = '';
 
-				fetch('/', {
+				fetch(window.location.pathname, {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
 					},
-					body: JSON.stringify({ prompt: userInput }),
+					body: JSON.stringify({
+						prompt: userInput,
+						model: selectedValue,
+					}),
 				})
 					.then((response) => response.blob())
 					.then((imageBlob) => {
