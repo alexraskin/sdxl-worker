@@ -2,7 +2,6 @@ import { Hono, Context } from 'hono';
 import { cors } from 'hono/cors';
 import { prettyJSON } from 'hono/pretty-json';
 import { logger } from 'hono/logger';
-import { cache } from 'hono/cache';
 import { timing, startTime, endTime } from 'hono/timing';
 import { Ai } from '@cloudflare/ai';
 
@@ -29,16 +28,9 @@ app.use(
 	}),
 );
 
-app.use(
-	'*',
-	cache({
-		cacheName: 'imagine.00z.sh',
-		cacheControl: 'max-age=3600',
-	}),
-);
 app.use(timing());
-app.use(logger());
-app.use(prettyJSON());
+app.use('*', logger());
+app.use('*', prettyJSON());
 
 app.get('/', async (c: Context) => {
 	c.header('Content-Type', 'text/html');
@@ -50,15 +42,8 @@ app.post('/', async (c: Context) => {
 	const body = await c.req.json();
 	const ai = new Ai(c.env.AI);
 
-	if (!body.prompt) {
-		c.header('Content-Type', 'application/json');
-		return c.json({ message: 'Prompt is required', ok: false }, 400);
-	}
-
-	if (body.num_steps && (body.num_steps < 1 || body.num_steps > 20)) {
-		c.header('Content-Type', 'application/json');
-		return c.json({ message: 'Number of steps must be between 1 and 20', ok: false }, 400);
-	}
+	const model = body.model || '@cf/stabilityai/stable-diffusion-xl-base-1.0';
+	console.log('model', model);
 
 	const inputs: BodyInputs = {
 		prompt: body.prompt,
@@ -68,7 +53,7 @@ app.post('/', async (c: Context) => {
 	let response: Uint8Array = new Uint8Array();
 
 	try {
-		response = await ai.run('@cf/stabilityai/stable-diffusion-xl-base-1.0', inputs);
+		response = await ai.run(model, inputs);
 	} catch (e) {
 		if (e instanceof Error) {
 			c.header('Content-Type', 'application/json');

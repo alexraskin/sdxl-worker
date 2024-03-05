@@ -4,11 +4,11 @@
 		"deploy": "wrangler deploy"
 	},
 	"dependencies": {
-		"@cloudflare/ai": "^1.0.52",
-		"hono": "^4.0.7"
+		"@cloudflare/ai": "^1.0.53",
+		"hono": "^4.0.10"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20240222.0",
-		"wrangler": "^3.30.0"
+		"wrangler": "^3.31.0"
 	}
 }
